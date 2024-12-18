@@ -3,5 +3,9 @@
     "bootstrap": "^5.3.3",
     "react-bootstrap": "^2.10.7",
     "react-router-dom": "^7.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2"
   }
 }
