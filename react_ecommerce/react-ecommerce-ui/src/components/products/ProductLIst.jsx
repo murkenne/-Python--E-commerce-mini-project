@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Toast, ToastContainer } from 'react-bootstrap';
+import { Toast, ToastContainer, Modal, Button } from 'react-bootstrap';
 
 const ProductList = ({ orderId }) => {
   const [products, setProducts] = useState([]);
@@ -9,6 +9,8 @@ const ProductList = ({ orderId }) => {
   const [apiError, setApiError] = useState(null);
   const [loggedInCustomer, setLoggedInCustomer] = useState(null);
   const [showToast, setShowToast] = useState(false); // For Toast Notification
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showProductModal, setShowProductModal] = useState(false);
 
   // ✅ Fetch Logged-in Customer from localStorage
   useEffect(() => {
@@ -53,7 +55,9 @@ const ProductList = ({ orderId }) => {
       // Optionally: Update product state
       setProducts((prevProducts) =>
         prevProducts.map((product) =>
-          product.id === productId ? { ...product, status: 'Ordered' } : product
+          product.id === productId
+            ? { ...product, stock: product.stock - 1, status: 'Ordered' }
+            : product
         )
       );
 
@@ -76,6 +80,18 @@ const ProductList = ({ orderId }) => {
     }
   };
 
+  // ✅ Fetch Product Details
+  const handleViewProductDetails = async (productId) => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000/products/${productId}`);
+      setSelectedProduct(response.data);
+      setShowProductModal(true);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      setApiError('Failed to fetch product details. Please try again.');
+    }
+  };
+
   return (
     <div className="product-list">
       <h1>Products</h1>
@@ -89,7 +105,13 @@ const ProductList = ({ orderId }) => {
       <ul>
         {products.map((product) => (
           <li key={product.id}>
-            {product.name} (ID: {product.id}) - ${product.price}
+            <strong
+              onClick={() => handleViewProductDetails(product.id)}
+              style={{ cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              {product.name}
+            </strong>
+            {' '} (ID: {product.id}) - ${product.price} - Stock: {product.stock}
             <button
               onClick={() => handleAddToOrder(product.id)}
               style={{ marginLeft: '10px' }}
@@ -115,6 +137,29 @@ const ProductList = ({ orderId }) => {
           <Toast.Body>Product successfully added to your order!</Toast.Body>
         </Toast>
       </ToastContainer>
+
+      {/* ✅ Product Details Modal */}
+      <Modal show={showProductModal} onHide={() => setShowProductModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Product Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedProduct ? (
+            <>
+              <p><strong>Name:</strong> {selectedProduct.name}</p>
+              <p><strong>Price:</strong> ${selectedProduct.price}</p>
+              <p><strong>Stock:</strong> {selectedProduct.stock}</p>
+            </>
+          ) : (
+            <p>Loading product details...</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowProductModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
