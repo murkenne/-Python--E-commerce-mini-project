@@ -1,0 +1,39 @@
+import { useParams } from 'react-router-dom';
+import { Container, Card } from 'react-bootstrap';
+
+const CustomerPage = () => {
+  // Extract customerId from the route parameters
+  const { customerId } = useParams();
+
+  console.log('Route Param customerId:', customerId); // ✅ Debug customerId
+
+  if (!customerId) {
+    return (
+      <Container className="mt-4">
+        <Card className="shadow-sm">
+          <Card.Body>
+            <h3>Error</h3>
+            <p>Customer ID is missing. Please navigate back and try again.</p>
+          </Card.Body>
+        </Card>
+      </Container>
+    );
+  }
+
+  return (
+    <Container className="mt-4">
+      <Card className="shadow-sm">
+        <Card.Header className="bg-primary text-white text-center">
+          <h2>Customer Dashboard</h2>
+        </Card.Header>
+        <Card.Body>
+          <h4>Welcome, Customer #{customerId}!</h4>
+          <p>Below is your order history:</p>
+          <OrderHistory customerId={Number(customerId)} />
+        </Card.Body>
+      </Card>
+    </Container>
+  );
+};
+
+export default CustomerPage;

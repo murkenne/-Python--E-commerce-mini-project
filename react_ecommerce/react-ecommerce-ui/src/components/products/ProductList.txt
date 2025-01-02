@@ -1,0 +1,45 @@
+Original
+import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const ProductList = ({ orderId }) => {
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/products');
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Failed to fetch products. Please try again later.');
+      }
+    };
+
+    fetchProducts();
+  }, [orderId]);
+
+  return (
+    <div className="product-list">
+      <h1>Products</h1>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <ul>
+        {products.map((product) => (
+          <li key={product.id}>
+            {product.name} (ID: {product.id})
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+ProductList.propTypes = {
+  orderId: PropTypes.number,
+};
+
+export default ProductList;
+
+
