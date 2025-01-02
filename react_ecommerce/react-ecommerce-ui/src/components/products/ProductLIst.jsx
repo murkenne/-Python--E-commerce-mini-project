@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Toast, ToastContainer, Modal, Button } from 'react-bootstrap';
+import { Toast, ToastContainer, Modal, Button, Card, Row, Col, Alert } from 'react-bootstrap';
 
 const ProductList = ({ orderId }) => {
   const [products, setProducts] = useState([]);
@@ -52,7 +52,7 @@ const ProductList = ({ orderId }) => {
       // ✅ Add Success Alert
       alert(`Product '${productId}' successfully added to your order.`);
 
-      // Optionally: Update product state
+      // Update stock
       setProducts((prevProducts) =>
         prevProducts.map((product) =>
           product.id === productId
@@ -61,7 +61,6 @@ const ProductList = ({ orderId }) => {
         )
       );
 
-      // ✅ Show Toast Notification
       setShowToast(true);
     } catch (error) {
       console.error('Error adding product to order:', error);
@@ -93,40 +92,45 @@ const ProductList = ({ orderId }) => {
   };
 
   return (
-    <div className="product-list">
-      <h1>Products</h1>
+    <div className="container mt-4">
+      <h1 className="mb-4 text-center">Products</h1>
       {loggedInCustomer && (
-        <p>
+        <Alert variant="info" className="text-center">
           Logged in as: <strong>{loggedInCustomer.name}</strong>
-        </p>
+        </Alert>
       )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {apiError && <p style={{ color: 'red' }}>{apiError}</p>}
-      <ul>
+      {error && <Alert variant="danger">{error}</Alert>}
+      {apiError && <Alert variant="danger">{apiError}</Alert>}
+
+      {/* ✅ Product Grid */}
+      <Row xs={1} md={3} className="g-4">
         {products.map((product) => (
-          <li key={product.id}>
-            <strong
-              onClick={() => handleViewProductDetails(product.id)}
-              style={{ cursor: 'pointer', textDecoration: 'underline' }}
-            >
-              {product.name}
-            </strong>
-            {' '} (ID: {product.id}) - ${product.price} - Stock: {product.stock}
-            <button
-              onClick={() => handleAddToOrder(product.id)}
-              style={{ marginLeft: '10px' }}
-            >
-              Add to Order
-            </button>
-            <button
-              onClick={() => handleDelete(product.id)}
-              style={{ marginLeft: '10px' }}
-            >
-              Delete
-            </button>
-          </li>
+          <Col key={product.id}>
+            <Card className="h-100 shadow-sm">
+              <Card.Body>
+                <Card.Title
+                  onClick={() => handleViewProductDetails(product.id)}
+                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {product.name}
+                </Card.Title>
+                <Card.Text>
+                  <strong>Price:</strong> ${product.price} <br />
+                  <strong>Stock:</strong> {product.stock}
+                </Card.Text>
+              </Card.Body>
+              <Card.Footer className="d-flex justify-content-between">
+                <Button variant="success" size="sm" onClick={() => handleAddToOrder(product.id)}>
+                  Add to Order
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleDelete(product.id)}>
+                  Delete
+                </Button>
+              </Card.Footer>
+            </Card>
+          </Col>
         ))}
-      </ul>
+      </Row>
 
       {/* ✅ Toast Notification */}
       <ToastContainer position="top-end" className="p-3">
